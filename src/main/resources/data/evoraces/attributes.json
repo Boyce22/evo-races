@@ -1,0 +1,61 @@
+{
+  "attributes": [
+    {
+      "id": "vitality",
+      "name": "Vitalidade",
+      "description": "Aumenta a vida máxima do jogador.",
+      "base_value": 100,
+      "max_value": 500,
+      "effect_per_point": 2.0,
+      "effect_description": "+2 de vida por ponto"
+    },
+    {
+      "id": "strength",
+      "name": "Força",
+      "description": "Aumenta o dano físico causado.",
+      "base_value": 100,
+      "max_value": 500,
+      "effect_per_point": 0.5,
+      "effect_description": "+0.5% de dano físico por ponto"
+    },
+    {
+      "id": "agility",
+      "name": "Agilidade",
+      "description": "Aumenta a velocidade de movimento e chance de esquiva.",
+      "base_value": 100,
+      "max_value": 500,
+      "effect_per_point": 0.3,
+      "effect_description": "+0.3% de velocidade por ponto"
+    },
+    {
+      "id": "intellect",
+      "name": "Intelecto",
+      "description": "Aumenta o dano mágico e regeneração de mana.",
+      "base_value": 100,
+      "max_value": 500,
+      "effect_per_point": 0.5,
+      "effect_description": "+0.5% de dano mágico por ponto"
+    },
+    {
+      "id": "resistance",
+      "name": "Resistência",
+      "description": "Reduz o dano recebido e aumenta a defesa.",
+      "base_value": 100,
+      "max_value": 500,
+      "effect_per_point": 0.4,
+      "effect_description": "+0.4% de redução de dano por ponto"
+    }
+  ],
+  "modifier_sources": {
+    "race": "Modificador base da raça",
+    "evolution": "Bônus de evolução",
+    "equipment": "Bônus de equipamento",
+    "buff": "Bônus temporário de buffs",
+    "skill": "Bônus de habilidades/passivas"
+  },
+  "calculation": {
+    "formula": "final_attribute = base_value + race_bonus + evolution_bonus + equipment_bonus + buff_bonus",
+    "cache_duration": 60,
+    "cache_description": "Cache de cálculos por 60 ticks (3 segundos) para performance"
+  }
+}

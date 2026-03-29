@@ -1,0 +1,49 @@
+{
+  "races": [
+    {
+      "id": "human",
+      "name": "Humano",
+      "description": "Raça versátil e adaptável, sem especializações mas também sem fraquezas pronunciadas.",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": ["basic_attack"],
+      "weaknesses": [],
+      "evolution_paths": ["warrior", "mage", "explorer"]
+    },
+    {
+      "id": "elf",
+      "name": "Elfo",
+      "description": "Raça ágil e inteligente, com afinidade natural com a magia e a natureza.",
+      "attributes": {
+        "vitality": 80,
+        "strength": 60,
+        "agility": 120,
+        "intellect": 110,
+        "resistance": 80
+      },
+      "abilities": ["dash", "nature_regen"],
+      "weaknesses": ["low_defense"],
+      "evolution_paths": ["high_elf", "forest_guardian", "arcane_mage"]
+    },
+    {
+      "id": "dwarf",
+      "name": "Anão",
+      "description": "Raça resistente e forte, excelente em combate corpo a corpo e mineração.",
+      "attributes": {
+        "vitality": 120,
+        "strength": 110,
+        "agility": 70,
+        "intellect": 80,
+        "resistance": 120
+      },
+      "abilities": ["stone_skin", "mining_expertise"],
+      "weaknesses": ["slow_movement"],
+      "evolution_paths": ["mountain_king", "blacksmith", "runesmith"]
+    }
+  ]
+}

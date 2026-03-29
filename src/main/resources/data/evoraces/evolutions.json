@@ -1,0 +1,79 @@
+{
+  "evolutions": [
+    {
+      "id": "elf_to_high_elf",
+      "from": "elf",
+      "to": "high_elf",
+      "name": "Alto Elfo",
+      "description": "Evolução para uma forma mais pura e poderosa de elfo, com maior afinidade mágica.",
+      "conditions": [
+        "intellect > 100",
+        "level > 20",
+        "time_played > 10h"
+      ],
+      "triggers": ["magic_usage", "forest_biome"],
+      "attribute_bonus": {
+        "vitality": 10,
+        "strength": 5,
+        "agility": 15,
+        "intellect": 25,
+        "resistance": 10
+      },
+      "new_abilities": ["arcane_shield", "mana_regeneration"],
+      "requirements": {
+        "items": ["enchanted_book", "emerald"],
+        "xp_level": 20
+      }
+    },
+    {
+      "id": "human_to_warrior",
+      "from": "human",
+      "to": "warrior",
+      "name": "Guerreiro",
+      "description": "Evolução focada em combate corpo a corpo e resistência.",
+      "conditions": [
+        "strength > 90",
+        "combat_kills > 50",
+        "melee_damage > 1000"
+      ],
+      "triggers": ["combat", "melee_usage"],
+      "attribute_bonus": {
+        "vitality": 30,
+        "strength": 25,
+        "agility": 10,
+        "intellect": 5,
+        "resistance": 20
+      },
+      "new_abilities": ["berserker_rage", "heavy_attack"],
+      "requirements": {
+        "items": ["iron_sword", "shield"],
+        "xp_level": 15
+      }
+    },
+    {
+      "id": "dwarf_to_mountain_king",
+      "from": "dwarf",
+      "to": "mountain_king",
+      "name": "Rei da Montanha",
+      "description": "Evolução que transforma o anão em um líder lendário das montanhas.",
+      "conditions": [
+        "resistance > 110",
+        "mining_blocks > 1000",
+        "underground_time > 5h"
+      ],
+      "triggers": ["mining", "mountain_biome"],
+      "attribute_bonus": {
+        "vitality": 40,
+        "strength": 30,
+        "agility": 5,
+        "intellect": 10,
+        "resistance": 35
+      },
+      "new_abilities": ["mountain_call", "earthquake"],
+      "requirements": {
+        "items": ["diamond_pickaxe", "gold_ingot"],
+        "xp_level": 25
+      }
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "abilities": [
+    {
+      "id": "basic_attack",
+      "name": "Ataque Básico",
+      "description": "Ataque físico básico.",
+      "cooldown": 1.0,
+      "resource_cost": 0,
+      "effects": ["damage"],
+      "type": "passive"
+    },
+    {
+      "id": "dash",
+      "name": "Dash",
+      "description": "Movimentação rápida em uma direção.",
+      "cooldown": 5.0,
+      "resource_cost": 10,
+      "effects": ["speed_boost", "invulnerability_frame"],
+      "type": "active"
+    },
+    {
+      "id": "nature_regen",
+      "name": "Regeneração Natural",
+      "description": "Regenera vida gradualmente quando em biomas naturais.",
+      "cooldown": 0.0,
+      "resource_cost": 0,
+      "effects": ["health_regen"],
+      "type": "passive"
+    },
+    {
+      "id": "stone_skin",
+      "name": "Pele de Pedra",
+      "description": "Aumenta a resistência a danos físicos.",
+      "cooldown": 30.0,
+      "resource_cost": 20,
+      "effects": ["damage_reduction"],
+      "type": "active",
+      "duration": 15.0
+    },
+    {
+      "id": "mining_expertise",
+      "name": "Expertise em Mineração",
+      "description": "Aumenta a velocidade de mineração e chance de encontrar minérios raros.",
+      "cooldown": 0.0,
+      "resource_cost": 0,
+      "effects": ["mining_speed", "rare_ore_chance"],
+      "type": "passive"
+    }
+  ]
+}

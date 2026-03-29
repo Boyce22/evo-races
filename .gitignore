@@ -1,0 +1,6 @@
+.idea
+.claude
+.gradle
+*.patch
+build
+run

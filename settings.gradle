@@ -1,0 +1,8 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()              // Plugins padrão (ex: maven-publish)
+        maven { url = 'https://maven.fabricmc.net/' } // Para Fabric Loom
+    }
+}
+
+rootProject.name = 'evo-races'
