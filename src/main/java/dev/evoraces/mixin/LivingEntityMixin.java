@@ -1,10 +1,14 @@
 package dev.evoraces.mixin;
 
 import dev.evoraces.network.DamagePayload;
+import dev.evoraces.network.EffectPayload;
+import dev.evoraces.utils.DamageTypeUtils;
+import dev.evoraces.utils.DamageVisuals;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,18 +25,83 @@ public abstract class LivingEntityMixin {
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        if (entity.getWorld().isClient()) return;
-        if (amount <= 0) return;
+
+        if (!isValidDamageEvent(entity, amount)) return;
+
+        boolean isCrit = isCriticalHit(source);
+        DamageVisuals visuals = resolveVisuals(source, isCrit);
+
+        DamagePayload damagePayload = new DamagePayload(entity.getId(), amount, isCrit);
+        EffectPayload effectPayload = createEffectPayload(entity.getId(), visuals, isCrit);
+
+        dispatchPayloads(entity, damagePayload, effectPayload);
+    }
+
+    /**
+     * Valida se o dano deve ser processado (ignora lado cliente, dano nulo ou ‘spam’ de ticks).
+     */
+    @Unique
+    private boolean isValidDamageEvent(LivingEntity entity, float amount) {
+        if (entity.getWorld().isClient() || amount <= 0) return false;
 
         long currentTick = entity.getWorld().getTime();
-        if (lastDamageTick != -1 && currentTick - lastDamageTick < 1) return;
+        if (lastDamageTick != -1 && currentTick - lastDamageTick < 1) return false;
+
         lastDamageTick = currentTick;
+        return true;
+    }
 
-        DamagePayload payload = new DamagePayload(entity.getId(), amount);
+    /**
+     * Isola as regras complexas de acerto crítico físico do Vanilla.
+     */
+    @Unique
+    private boolean isCriticalHit(DamageSource source) {
+        if (!(source.getAttacker() instanceof PlayerEntity player)) return false;
 
-        PlayerLookup.tracking(entity).forEach(player -> ServerPlayNetworking.send(player, payload));
+        return player.fallDistance > 0.0F
+                && !player.isOnGround()
+                && !player.isClimbing()
+                && !player.isTouchingWater()
+                && !player.hasVehicle();
+    }
+
+    /**
+     * Resolve o que será exibido (seja o crítico nativo ou um dano mapeado).
+     */
+    @Unique
+    private DamageVisuals resolveVisuals(DamageSource source, boolean isCrit) {
+        if (isCrit) {
+            return new DamageVisuals("CRITICAL", 0xFFFFD700);
+        }
+        return DamageTypeUtils.getVisuals(source);
+    }
+
+    /**
+     * Fabrica o payload de efeito apenas se houver visuais para exibir.
+     */
+    @Unique
+    private EffectPayload createEffectPayload(int entityId, DamageVisuals visuals, boolean isCrit) {
+        if (visuals == null) return null;
+        return new EffectPayload(entityId, visuals.text(), visuals.color(), isCrit);
+    }
+
+    /**
+     * Centraliza a lógica de envio de pacotes na rede (rastreados e autorrastreio).
+     */
+    @Unique
+    private void dispatchPayloads(LivingEntity entity, DamagePayload damagePayload, EffectPayload effectPayload) {
+        for (ServerPlayerEntity trackingPlayer : PlayerLookup.tracking(entity)) {
+            ServerPlayNetworking.send(trackingPlayer, damagePayload);
+            if (effectPayload != null) {
+                ServerPlayNetworking.send(trackingPlayer, effectPayload);
+            }
+        }
+
         if (entity instanceof ServerPlayerEntity self) {
-            ServerPlayNetworking.send(self, payload);
+            ServerPlayNetworking.send(self, damagePayload);
+            if (effectPayload != null) {
+                ServerPlayNetworking.send(self, effectPayload);
+            }
         }
     }
 }

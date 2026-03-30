@@ -1,6 +1,7 @@
 package dev.evoraces;
 
 import dev.evoraces.client.DamageIndicatorRegistry;
+import dev.evoraces.client.StatusTextRegistry; // <-- IMPORTANTE
 import dev.evoraces.network.ClientPacketHandler;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -16,7 +17,12 @@ public class EvoRacesClient implements ClientModInitializer {
         LOGGER.info("[EvoRaces] Client inicializando...");
 
         ClientPacketHandler.register();
-        ClientTickEvents.END_CLIENT_TICK.register(client -> DamageIndicatorRegistry.tick());
+
+        // Atualizamos os dois sistemas a cada tick do jogo
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            DamageIndicatorRegistry.tick();
+            StatusTextRegistry.tick(); // <-- NOVO: Faz os textos sumirem após 2 segundos
+        });
 
         LOGGER.info("[EvoRaces] Client inicializado.");
     }
