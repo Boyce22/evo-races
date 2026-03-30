@@ -24,7 +24,7 @@ public class RaceCommand {
         dispatcher.register(
                 CommandManager.literal("race")
                         // Acessível a todos os jogadores (nível 0)
-                        .requires(source -> source.isExecutedByPlayer())
+                        .requires(ServerCommandSource::isExecutedByPlayer)
                         .then(
                                 CommandManager.argument("id", StringArgumentType.word())
                                         .suggests((context, builder) -> {
