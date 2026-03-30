@@ -1,23 +1,20 @@
 package dev.evoraces.client;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class DamageIndicatorRegistry {
 
-    private static final Map<Integer, List<DamageIndicator>> indicators = new HashMap<>();
+    // Usa int primitivo como chave, sem Autoboxing
+    private static final Int2ObjectMap<List<DamageIndicator>> indicators = new Int2ObjectOpenHashMap<>();
     private static final int MAX_PER_ENTITY = 5;
 
-    public static void add(int entityId, int damage, int color) {
-        add(entityId, damage, color, 1.0f, null, false);
-    }
-
-    public static void add(int entityId, int damage, int color, float glowIntensity, String effectText, boolean isCritical) {
+    public static void add(int entityId, float damage, boolean isCritical) {
         List<DamageIndicator> list = indicators.computeIfAbsent(entityId, k -> new ArrayList<>());
         if (list.size() < MAX_PER_ENTITY) {
-            list.add(new DamageIndicator(entityId, damage, color, glowIntensity, effectText, isCritical));
+            list.add(new DamageIndicator(entityId, damage, isCritical));
         }
     }
 
@@ -25,16 +22,12 @@ public class DamageIndicatorRegistry {
         return indicators.getOrDefault(entityId, List.of());
     }
 
-    public static List<DamageIndicator> getActive() {
-        return indicators.values().stream().flatMap(List::stream).toList();
-    }
-
     public static void tick() {
         indicators.values().removeIf(list -> {
-            for (DamageIndicator indicator : list) {
+            list.removeIf(indicator -> {
                 indicator.tick();
-            }
-            list.removeIf(DamageIndicator::isExpired);
+                return indicator.isExpired();
+            });
             return list.isEmpty();
         });
     }
