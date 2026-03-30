@@ -26,6 +26,7 @@ public class EvoRacesClient implements ClientModInitializer {
         });
 
         LOGGER.info("[EvoRaces] Client inicializado.");
+
         // Liga o rádio do Cliente para escutar as mensagens do Servidor
         ModMessages.registerS2CPackets();
 
