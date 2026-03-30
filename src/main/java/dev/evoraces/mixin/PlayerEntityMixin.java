@@ -87,4 +87,25 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
             evoraces$setRaceId(nbt.getString("evoraces_race_id"));
         }
     }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void evoraces$dwarfPhysicsTick(CallbackInfo ci) {
+        // Usamos o cast para a interface que criamos, assim o Java reconhece o método
+        String currentRace = ((PlayerDataHolder) this).evoraces$getRaceId();
+
+        if ("dwarf".equals(currentRace)) {
+            PlayerEntity player = (PlayerEntity)(Object)this;
+
+            // 1. Ajuste de degrau (estabilidade)
+            player.setStepHeight(0.5f);
+
+            // 2. PENALIDADE DE NADO (ANÃO DE CHUMBO)
+            if (player.isTouchingWater()) {
+                // Reduz a velocidade horizontal (X e Z) e vertical (Y)
+                // O anão agora se move como se estivesse pesado
+                player.setVelocity(player.getVelocity().multiply(0.6, 0.8, 0.6));
+                player.addVelocity(0, -0.01, 0); // Puxa ele levemente para baixo constantemente
+            }
+        }
+    }
 }
