@@ -8,8 +8,8 @@
         "vitality": 100,
         "strength": 100,
         "agility": 100,
-        "intellect": 100,
-        "resistance": 100
+        "intellect": 75,
+        "resistance": 75
       },
       "abilities": ["basic_attack"],
       "weaknesses": [],
@@ -22,9 +22,9 @@
       "attributes": {
         "vitality": 80,
         "strength": 60,
-        "agility": 120,
+        "agility": 110,
         "intellect": 110,
-        "resistance": 80
+        "resistance": 70
       },
       "abilities": ["dash", "nature_regen"],
       "weaknesses": ["low_defense"],
@@ -39,11 +39,23 @@
         "strength": 110,
         "agility": 70,
         "intellect": 80,
-        "resistance": 120
+        "resistance": 100
       },
       "abilities": ["stone_skin", "mining_expertise"],
       "weaknesses": ["slow_movement"],
       "evolution_paths": ["mountain_king", "blacksmith", "runesmith"]
+    },
+    {
+      "id": "undead",
+      "name": "Morto-vivo",
+      "description": "Alma humana corrompida por antigas maldições, caminha entre os vivos com afinidade natural por criaturas hostis e resistência sobrenatural.",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 50,
+        "resistance": 120
+      }
     }
   ]
 }
