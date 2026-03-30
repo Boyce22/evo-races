@@ -101,7 +101,7 @@ git commit -m "tipo(escopo): descrição"
 ## 🤖 Uso de IA (mantido, mas direto)
 
 ```
-Gere uma mensagem de commit no padrão Conventional Commits.
+Gere uma mensagem de commit em português e a branch em inglês no padrão Conventional Commits.
 
 Formato: <tipo>(<escopo>): <descrição>
 

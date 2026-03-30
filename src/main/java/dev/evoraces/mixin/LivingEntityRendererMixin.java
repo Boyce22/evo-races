@@ -1,7 +1,7 @@
 package dev.evoraces.mixin;
 
-import dev.evoraces.client.DamageIndicator;
-import dev.evoraces.client.DamageIndicatorRegistry;
+import dev.evoraces.client.FloatingNumber;
+import dev.evoraces.client.FloatingNumberRegistry;
 import dev.evoraces.client.StatusTextPopup;
 import dev.evoraces.client.StatusTextRegistry;
 import net.minecraft.client.MinecraftClient;
@@ -57,28 +57,27 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity> {
             matrices.pop();
         }
 
-        List<DamageIndicator> indicators = DamageIndicatorRegistry.getActiveFor(entity.getId());
-        for (DamageIndicator indicator : indicators) {
-            float progress = indicator.progress(tickDelta);
+        List<FloatingNumber> numbers = FloatingNumberRegistry.getActiveFor(entity.getId());
+        for (FloatingNumber number : numbers) {
+            float progress = number.progress(tickDelta);
 
             float p = 1.0f - progress;
             float easeOut = 1.0f - (p * p * p);
 
             matrices.push();
-            matrices.translate(indicator.offsetX, entity.getHeight() + 0.3f + (easeOut), indicator.offsetZ);
+            matrices.translate(number.offsetX, entity.getHeight() + 0.3f + (easeOut), number.offsetZ);
             matrices.multiply(rotation);
 
             float fade = 1.0f;
             if (progress < 0.1f) fade = progress / 0.1f;
             else if (progress > 0.7f) fade = 1.0f - ((progress - 0.7f) / 0.3f);
 
-            float baseScale = indicator.isCritical ? -0.035f : -0.025f;
+            float baseScale = number.isCritical ? -0.035f : -0.025f;
             float scale = baseScale * Math.max(fade, 0f);
             matrices.scale(scale, scale, scale);
 
-            float x = -textRenderer.getWidth(indicator.text) / 2f;
-
-            textRenderer.drawWithOutline(indicator.text, x, 0, indicator.color, OUTLINE_COLOR, matrices.peek().getPositionMatrix(), vertexConsumers, FULL_BRIGHT);
+            float x = -textRenderer.getWidth(number.text) / 2f;
+            textRenderer.drawWithOutline(number.text, x, 0, number.color, OUTLINE_COLOR, matrices.peek().getPositionMatrix(), vertexConsumers, FULL_BRIGHT);
 
             matrices.pop();
         }
