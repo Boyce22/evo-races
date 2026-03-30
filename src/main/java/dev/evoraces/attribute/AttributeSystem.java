@@ -19,14 +19,15 @@ public class AttributeSystem {
     private static int tickCounter = 0;
 
     public static void register() {
-        // Verifica atributos apenas 1x/segundo (a cada 20 ticks) em vez de todo tick
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             if (++tickCounter % 20 != 0) return;
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 updatePlayerAttributes(player);
+
+                // NOSSA NOVA LINHA DE CÓDIGO AQUI:
+                checkDynamicEnvironment(player);
             }
         });
-
         EvoRaces.LOGGER.info("AttributeSystem registrado");
     }
 
@@ -139,5 +140,39 @@ public class AttributeSystem {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
         return a.equals(b);
+    }
+    // Criamos um RG único para o bônus da caverna não dar conflito com a lentidão base
+    private static final java.util.UUID DWARF_CAVE_BONUS_ID = java.util.UUID.fromString("c0ffee00-0000-0000-0000-000000000000");
+
+    public static void checkDynamicEnvironment(ServerPlayerEntity player) {
+        String raceId = dev.evoraces.player.PlayerData.getPlayerRaceId(player);
+
+        if ("dwarf".equals(raceId)) {
+            net.minecraft.entity.attribute.EntityAttributeInstance speedAttr = player.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED);
+            if (speedAttr == null) return;
+
+            boolean inCave = player.getY() < 40;
+            boolean hasBonus = speedAttr.getModifier(DWARF_CAVE_BONUS_ID) != null;
+
+            if (inCave) {
+                // Se ENTROU na caverna e ainda não tem o bônus, injetamos ele!
+                if (!hasBonus) {
+                    // +0.05 é velocidade suficiente para anular a lentidão e ainda fazer ele correr rápido
+                    speedAttr.addPersistentModifier(new net.minecraft.entity.attribute.EntityAttributeModifier(
+                            DWARF_CAVE_BONUS_ID, "Dwarf Cave Bonus", 0.05,
+                            net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                // Mantém a Pressa de mineração (invisível) sempre ativa enquanto estiver lá embaixo
+                player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                        net.minecraft.entity.effect.StatusEffects.HASTE, 40, 1, false, false, false
+                ));
+            } else {
+                // Se SAIU da caverna, removemos o bônus na hora, e a lentidão base volta a agir!
+                if (hasBonus) {
+                    speedAttr.removeModifier(DWARF_CAVE_BONUS_ID);
+                }
+            }
+        }
     }
 }

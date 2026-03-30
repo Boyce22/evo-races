@@ -32,13 +32,20 @@ public class PlayerData {
         return data;
     }
 
-    // Escreve direto no campo injetado pelo mixin (Minecraft persiste automaticamente via writeCustomDataToNbt)
+    // Escreve direto no campo injetado pelo mixin
     public static void save(ServerPlayerEntity player, PlayerData data) {
         ((PlayerDataHolder) player).evoraces$setRaceId(data.getRaceId());
     }
 
+    // FUNÇÃO ÚNICA E CORRIGIDA
     public static void setPlayerRace(ServerPlayerEntity player, String raceId) {
         ((PlayerDataHolder) player).evoraces$setRaceId(raceId);
+
+        // Se a linha abaixo continuar vermelha, pode apagá-la.
+        // O agachar (Shift) no jogo fará o mesmo efeito.
+        player.calculateDimensions();
+
+        dev.evoraces.network.ModMessages.sendRaceSync(player, raceId);
     }
 
     public static String getPlayerRaceId(ServerPlayerEntity player) {
