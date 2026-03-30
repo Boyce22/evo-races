@@ -3,6 +3,7 @@ package dev.evoraces;
 import dev.evoraces.client.FloatingNumberRegistry;
 import dev.evoraces.client.StatusTextRegistry; // <-- IMPORTANTE
 import dev.evoraces.network.ClientPacketHandler;
+import dev.evoraces.network.ModMessages;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import org.slf4j.Logger;
@@ -25,5 +26,9 @@ public class EvoRacesClient implements ClientModInitializer {
         });
 
         LOGGER.info("[EvoRaces] Client inicializado.");
+        // Liga o rádio do Cliente para escutar as mensagens do Servidor
+        ModMessages.registerS2CPackets();
+
+        EvoRaces.LOGGER.info("EvoRaces Cliente inicializado e escutando a rede!");
     }
 }
