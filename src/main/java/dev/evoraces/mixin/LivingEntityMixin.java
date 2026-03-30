@@ -2,6 +2,7 @@ package dev.evoraces.mixin;
 
 import dev.evoraces.network.DamagePayload;
 import dev.evoraces.network.EffectPayload;
+import dev.evoraces.network.HealPayload;
 import dev.evoraces.utils.DamageTypeUtils;
 import dev.evoraces.utils.DamageVisuals;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
@@ -21,6 +23,9 @@ public abstract class LivingEntityMixin {
 
     @Unique
     private long lastDamageTick = -1L;
+
+    @Unique
+    private long lastHealTick = -1L;
 
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
@@ -35,6 +40,27 @@ public abstract class LivingEntityMixin {
         EffectPayload effectPayload = createEffectPayload(entity.getId(), visuals, isCrit);
 
         dispatchPayloads(entity, damagePayload, effectPayload);
+    }
+
+    @Inject(method = "heal", at = @At("HEAD"))
+    private void onHeal(float amount, CallbackInfo ci) {
+        LivingEntity entity = (LivingEntity) (Object) this;
+
+        if (entity.getWorld().isClient() || amount <= 0 || entity.getHealth() >= entity.getMaxHealth()) return;
+
+        long currentTick = entity.getWorld().getTime();
+        if (lastHealTick != -1 && currentTick - lastHealTick < 1) return;
+        lastHealTick = currentTick;
+
+        HealPayload payload = new HealPayload(entity.getId(), amount);
+
+        for (ServerPlayerEntity trackingPlayer : PlayerLookup.tracking(entity)) {
+            ServerPlayNetworking.send(trackingPlayer, payload);
+        }
+
+        if (entity instanceof ServerPlayerEntity self) {
+            ServerPlayNetworking.send(self, payload);
+        }
     }
 
     /**

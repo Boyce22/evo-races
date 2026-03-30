@@ -1,6 +1,6 @@
 package dev.evoraces.network;
 
-import dev.evoraces.client.DamageIndicatorRegistry;
+import dev.evoraces.client.FloatingNumberRegistry;
 import dev.evoraces.client.StatusTextRegistry;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
@@ -9,10 +9,21 @@ public class ClientPacketHandler {
     public static void register() {
         ClientPlayNetworking.registerGlobalReceiver(DamagePayload.TYPE.getId(), (client, handler, buf, responseSender) -> {
             DamagePayload payload = DamagePayload.read(buf);
-            client.execute(() -> DamageIndicatorRegistry.add(
+            client.execute(() -> FloatingNumberRegistry.add(
                     payload.entityId(),
                     payload.amount(),
-                    payload.isCritical()
+                    payload.isCritical(),
+                    false // isHeal
+            ));
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(HealPayload.TYPE.getId(), (client, handler, buf, responseSender) -> {
+            HealPayload payload = HealPayload.read(buf);
+            client.execute(() -> FloatingNumberRegistry.add(
+                    payload.entityId(),
+                    payload.amount(),
+                    false,
+                    true
             ));
         });
 
