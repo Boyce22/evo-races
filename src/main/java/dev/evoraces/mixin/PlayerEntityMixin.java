@@ -1,6 +1,6 @@
-package dev.evoraces.mixin; // ← confira se este é seu pacote real
+package dev.evoraces.mixin;
 
-import dev.evoraces.player.PlayerDataHolder; // ← ajuste se PlayerDataHolder estiver em outro pacote
+import dev.evoraces.player.PlayerDataHolder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.data.DataTracker;
@@ -18,27 +18,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin implements PlayerDataHolder {
 
-    // ── TrackedData para sync automático ──────────────────────────────────────
     @Unique
     private static final TrackedData<String> EVORACES_RACE_ID =
             DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.STRING);
 
-    /**
-     * Helper @Unique: evita o problema de @Shadow em métodos herdados.
-     * O cast é seguro porque este Mixin só existe em PlayerEntity.
-     */
     @Unique
     private PlayerEntity evoraces$self() {
         return (PlayerEntity)(Object)this;
     }
 
-    // ── Inicializa o tracker ──────────────────────────────────────────────────
     @Inject(method = "initDataTracker", at = @At("TAIL"))
     private void evoraces$initDataTracker(CallbackInfo ci) {
-        evoraces$self().getDataTracker().startTracking(EVORACES_RACE_ID, "");
+        evoraces$self().getDataTracker().startTracking(EVORACES_RACE_ID, "dwarf");
     }
 
-    // ── Interface PlayerDataHolder ────────────────────────────────────────────
     @Override
     public String evoraces$getRaceId() {
         return evoraces$self().getDataTracker().get(EVORACES_RACE_ID);
@@ -47,10 +40,9 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
     @Override
     public void evoraces$setRaceId(String raceId) {
         evoraces$self().getDataTracker().set(EVORACES_RACE_ID, raceId == null ? "" : raceId);
-        evoraces$self().calculateDimensions(); // servidor recalcula imediatamente
+        evoraces$self().calculateDimensions();
     }
 
-    // ── Dimensões da hitbox ───────────────────────────────────────────────────
     @Inject(method = "getDimensions", at = @At("HEAD"), cancellable = true)
     private void evoraces$getDimensions(EntityPose pose, CallbackInfoReturnable<EntityDimensions> cir) {
         if (!"dwarf".equals(evoraces$getRaceId())) return;
@@ -66,19 +58,10 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
         cir.setReturnValue(pose == EntityPose.CROUCHING ? 0.80f : 0.98f);
     }
 
-    // ── Step Height ───────────────────────────────────────────────────────────
-    @Inject(method = "tick", at = @At("HEAD"))
-    private void evoraces$tick(CallbackInfo ci) {
-        if ("dwarf".equals(evoraces$getRaceId())) {
-            evoraces$self().setStepHeight(0.5f);
-        }
-    }
-
-    // ── Persistência NBT ──────────────────────────────────────────────────────
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
     private void evoraces$writeNbt(NbtCompound nbt, CallbackInfo ci) {
         String id = evoraces$getRaceId();
-        if (!id.isEmpty()) nbt.putString("evoraces_race_id", id);
+        if (id != null && !id.isEmpty()) nbt.putString("evoraces_race_id", id);
     }
 
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
@@ -89,23 +72,28 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
-    private void evoraces$dwarfPhysicsTick(CallbackInfo ci) {
-        // Usamos o cast para a interface que criamos, assim o Java reconhece o método
-        String currentRace = ((PlayerDataHolder) this).evoraces$getRaceId();
+    private void evoraces$tick(CallbackInfo ci) {
+        PlayerEntity player = evoraces$self();
+        String currentRace = evoraces$getRaceId();
 
-        if ("dwarf".equals(currentRace)) {
-            PlayerEntity player = (PlayerEntity)(Object)this;
+        // 1. FORÇA BRUTA DE SEGURANÇA (Garante que você é anão nos testes)
+        if (!"dwarf".equals(currentRace)) {
+            evoraces$setRaceId("dwarf");
+            player.calculateDimensions();
+            return;
+        }
 
-            // 1. Ajuste de degrau (estabilidade)
-            player.setStepHeight(0.5f);
+        // 2. TRAVA DE PERFORMANCE: Só recalcula se a altura estiver errada
+        // Isso impede que o jogo fique "moendo" CPU desnecessariamente
+        if (player.getDimensions(player.getPose()).height > 1.2f) {
+            player.calculateDimensions();
+        }
 
-            // 2. PENALIDADE DE NADO (ANÃO DE CHUMBO)
-            if (player.isTouchingWater()) {
-                // Reduz a velocidade horizontal (X e Z) e vertical (Y)
-                // O anão agora se move como se estivesse pesado
-                player.setVelocity(player.getVelocity().multiply(0.6, 0.8, 0.6));
-                player.addVelocity(0, -0.01, 0); // Puxa ele levemente para baixo constantemente
-            }
+        // 3. FÍSICA CONSTANTE
+        player.setStepHeight(0.5f);
+        if (player.isTouchingWater()) {
+            player.setVelocity(player.getVelocity().multiply(0.6, 0.8, 0.6));
+            player.addVelocity(0, -0.01, 0);
         }
     }
 }
