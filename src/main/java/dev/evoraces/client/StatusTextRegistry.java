@@ -14,12 +14,11 @@ public class StatusTextRegistry {
         List<StatusTextPopup> list = activeTexts.computeIfAbsent(entityId, k -> new ArrayList<>());
 
         if (list.size() >= MAX_TEXTS_PER_ENTITY) {
-            list.remove(0);
+            list.removeFirst();
         }
 
-        // Críticos são adicionados no topo
         if (isCritical) {
-            list.add(0, new StatusTextPopup(entityId, message, color, true));
+            list.addFirst(new StatusTextPopup(entityId, message, color, true));
         } else {
             list.add(new StatusTextPopup(entityId, message, color, false));
         }

@@ -10,6 +10,15 @@
       "effect_description": "+2 de vida por ponto"
     },
     {
+      "id": "dex",
+      "name": "Força",
+      "description": "Aumenta o dano físico causado.",
+      "base_value": 100,
+      "max_value": 500,
+      "effect_per_point": 0.5,
+      "effect_description": "+0.5% de dano físico por ponto"
+    },
+    {
       "id": "strength",
       "name": "Força",
       "description": "Aumenta o dano físico causado.",

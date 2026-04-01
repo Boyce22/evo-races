@@ -13,13 +13,25 @@ base {
 repositories {
     mavenCentral()
     maven { url 'https://maven.fabricmc.net/' } // Dependências do Fabric
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    // 1. Vírgula removida do final desta linha:
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // 2. Versão do Spark colocada diretamente (Exemplo para Minecraft 1.20.1):
+    modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
 }
 
 processResources {
