@@ -1,33 +1,50 @@
 package dev.evoraces.client;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FloatingNumberRegistry {
-
-    private static final Int2ObjectMap<List<FloatingNumber>> numbers = new Int2ObjectOpenHashMap<>();
-    private static final int MAX_PER_ENTITY = 5;
+    private static final List<FloatingNumber> ACTIVE_NUMBERS = new ArrayList<>();
 
     public static void add(int entityId, float amount, boolean isCritical, boolean isHeal) {
-        List<FloatingNumber> list = numbers.computeIfAbsent(entityId, k -> new ArrayList<>());
-        if (list.size() < MAX_PER_ENTITY) {
-            list.add(new FloatingNumber(entityId, amount, isCritical, isHeal));
+        // CURA não acumula para não confundir o jogador
+        if (isHeal) {
+            ACTIVE_NUMBERS.add(new FloatingNumber(entityId, amount, isCritical, true));
+            return;
+        }
+
+        // Tenta encontrar um número de dano já existente para este bicho
+        FloatingNumber existing = null;
+        for (FloatingNumber fn : ACTIVE_NUMBERS) {
+            if (fn.entityId == entityId && !fn.isExpired()) {
+                existing = fn;
+                break;
+            }
+        }
+
+        if (existing != null) {
+            // Se achou, apenas atualiza o valor!
+            existing.addAmount(amount, isCritical);
+        } else {
+            // Se não achou, cria um novo
+            ACTIVE_NUMBERS.add(new FloatingNumber(entityId, amount, isCritical, false));
         }
     }
 
     public static List<FloatingNumber> getActiveFor(int entityId) {
-        return numbers.getOrDefault(entityId, List.of());
+        return ACTIVE_NUMBERS.stream()
+                .filter(n -> n.entityId == entityId)
+                .collect(Collectors.toList());
     }
 
     public static void tick() {
-        numbers.values().removeIf(list -> {
-            list.removeIf(number -> {
-                number.tick();
-                return number.isExpired();
-            });
-            return list.isEmpty();
-        });
+        Iterator<FloatingNumber> it = ACTIVE_NUMBERS.iterator();
+        while (it.hasNext()) {
+            FloatingNumber n = it.next();
+            n.tick();
+            if (n.isExpired()) it.remove();
+        }
     }
 }

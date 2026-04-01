@@ -5,10 +5,13 @@ import dev.evoraces.client.FloatingNumberRegistry;
 import dev.evoraces.client.StatusTextPopup;
 import dev.evoraces.client.StatusTextRegistry;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.MathHelper;
+import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,65 +23,104 @@ import java.util.List;
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity> {
 
-    @Unique
-    private static final int FULL_BRIGHT = 15728880;
-    @Unique
-    private static final int OUTLINE_COLOR = 0xFF000000;
+    @Unique private static final int FULL_BRIGHT = 15728880;
+    @Unique private static final int OUTLINE_COLOR = 0xFF000000;
+    @Unique private static final float GRAVITY = 0.03f; // Força de puxo para baixo
 
     @Inject(method = "render*", at = @At("TAIL"))
     private void renderRpgPopups(T entity, float entityYaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
 
-        var client = MinecraftClient.getInstance();
-        var textRenderer = client.textRenderer;
-        var rotation = client.gameRenderer.getCamera().getRotation();
-
         List<StatusTextPopup> popups = StatusTextRegistry.getActiveFor(entity.getId());
+        List<FloatingNumber> numbers = FloatingNumberRegistry.getActiveFor(entity.getId());
+
+        if (popups.isEmpty() && numbers.isEmpty()) return;
+
+        var client = MinecraftClient.getInstance();
+        TextRenderer textRenderer = client.textRenderer;
+        Quaternionf cameraRotation = client.gameRenderer.getCamera().getRotation();
+
+        // --- 1. RENDER STATUS TEXTS ---
         for (StatusTextPopup popup : popups) {
             float progress = popup.progress(tickDelta);
+            float exactAge = popup.age + tickDelta; // Tempo exato em ticks (0 a 25)
 
-            float p = 1.0f - progress;
-            float easeOut = 1.0f - (p * p * p);
+            // Movimento Horizontal contínuo
+            float currentX = popup.startX + (popup.vx * exactAge);
+            float currentZ = popup.startZ + (popup.vz * exactAge);
+            float currentY;
+
+            if (popup.isCritical) {
+                // Parábola de impacto (Sobe e cai com a gravidade)
+                currentY = popup.startY + (popup.vy * exactAge) - (0.5f * GRAVITY * exactAge * exactAge);
+            } else {
+                // Flutuação de fumaça + Sway senoidal
+                currentY = popup.startY + (popup.vy * exactAge);
+                currentX += (float) Math.sin(exactAge * 0.2f) * 0.1f;
+            }
 
             matrices.push();
-            matrices.translate(popup.offsetX, entity.getHeight() + 0.6f + (easeOut * 0.8f), popup.offsetZ);
-            matrices.multiply(rotation);
+            matrices.translate(currentX, entity.getHeight() + 0.3f + currentY, currentZ);
+            matrices.multiply(cameraRotation);
 
-            float scale = popup.isCritical ? -0.030f : -0.020f;
-            matrices.scale(scale, scale, scale);
+            float scaleMultiplier = 1.0f;
+            if (progress < 0.1f) scaleMultiplier = MathHelper.lerp(progress / 0.1f, 0.5f, 1.4f);
+            else if (progress < 0.2f) scaleMultiplier = MathHelper.lerp((progress - 0.1f) / 0.1f, 1.4f, 1.0f);
 
-            float fade = progress > 0.7f ? 1.0f - ((progress - 0.7f) / 0.3f) : 1.0f;
-            int alpha = (int) (Math.max(fade, 0f) * 255);
+            float fade = 1.0f, shrink = 1.0f;
+            if (progress > 0.5f) {
+                float fadeProgress = (progress - 0.5f) / 0.5f;
+                fade = 1.0f - fadeProgress;
+                shrink = MathHelper.lerp(fadeProgress, 1.0f, 0.5f);
+            }
+
+            float baseScale = popup.isCritical ? -0.015f : -0.010f;
+            float finalScale = baseScale * scaleMultiplier * MathHelper.clamp(fade, 0f, 1f) * shrink;
+            matrices.scale(finalScale, finalScale, finalScale);
+
+            int alpha = (int) (MathHelper.clamp(fade, 0f, 1f) * 255);
             int finalColor = (popup.color & 0xFFFFFF) | (alpha << 24);
 
-            float x = -textRenderer.getWidth(popup.text) / 2f;
-
-            textRenderer.drawWithOutline(popup.text, x, 0, finalColor, OUTLINE_COLOR, matrices.peek().getPositionMatrix(), vertexConsumers, FULL_BRIGHT);
-
+            textRenderer.drawWithOutline(popup.text, -popup.textWidth / 2f, 0, finalColor, OUTLINE_COLOR, matrices.peek().getPositionMatrix(), vertexConsumers, FULL_BRIGHT);
             matrices.pop();
         }
 
-        List<FloatingNumber> numbers = FloatingNumberRegistry.getActiveFor(entity.getId());
+        // --- 2. RENDER FLOATING NUMBERS ---
         for (FloatingNumber number : numbers) {
             float progress = number.progress(tickDelta);
+            float exactAge = number.age + tickDelta; // Tempo exato em ticks (0 a 20)
 
-            float p = 1.0f - progress;
-            float easeOut = 1.0f - (p * p * p);
+            // Posição Física em Parábola
+            float currentX = number.startX + (number.vx * exactAge);
+            float currentZ = number.startZ + (number.vz * exactAge);
+            // Fórmula da Cinemática: y = y0 + v0*t - (g*t^2)/2
+            float currentY = number.startY + (number.vy * exactAge) - (0.5f * GRAVITY * exactAge * exactAge);
+
+            float jitterX = 0, jitterY = 0;
+            if (number.isCritical && progress < 0.2f) {
+                jitterX = (float) (Math.random() - 0.5f) * 0.06f;
+                jitterY = (float) (Math.random() - 0.5f) * 0.06f;
+            }
 
             matrices.push();
-            matrices.translate(number.offsetX, entity.getHeight() + 0.3f + (easeOut), number.offsetZ);
-            matrices.multiply(rotation);
+            matrices.translate(currentX + jitterX, entity.getHeight() + 0.3f + currentY + jitterY, currentZ);
+            matrices.multiply(cameraRotation);
 
-            float fade = 1.0f;
-            if (progress < 0.1f) fade = progress / 0.1f;
-            else if (progress > 0.7f) fade = 1.0f - ((progress - 0.7f) / 0.3f);
+            float scaleMultiplier = 1.0f;
+            if (progress < 0.1f) scaleMultiplier = MathHelper.lerp(progress / 0.1f, 0.5f, 1.4f);
+            else if (progress < 0.2f) scaleMultiplier = MathHelper.lerp((progress - 0.1f) / 0.1f, 1.4f, 1.0f);
 
-            float baseScale = number.isCritical ? -0.035f : -0.025f;
-            float scale = baseScale * Math.max(fade, 0f);
-            matrices.scale(scale, scale, scale);
+            float fade = 1.0f, shrink = 1.0f;
+            if (progress > 0.5f) {
+                float fadeProgress = (progress - 0.5f) / 0.5f;
+                fade = 1.0f - fadeProgress;
+                shrink = MathHelper.lerp(fadeProgress, 1.0f, 0.4f);
+            }
 
-            float x = -textRenderer.getWidth(number.text) / 2f;
-            textRenderer.drawWithOutline(number.text, x, 0, number.color, OUTLINE_COLOR, matrices.peek().getPositionMatrix(), vertexConsumers, FULL_BRIGHT);
+            float baseScale = number.isCritical ? -0.030f : -0.018f;
+            float finalScale = baseScale * scaleMultiplier * MathHelper.clamp(fade, 0f, 1f) * shrink;
+            matrices.scale(finalScale, finalScale, finalScale);
 
+            textRenderer.drawWithOutline(number.text, -number.textWidth / 2f, 0, number.color, OUTLINE_COLOR, matrices.peek().getPositionMatrix(), vertexConsumers, FULL_BRIGHT);
             matrices.pop();
         }
     }
