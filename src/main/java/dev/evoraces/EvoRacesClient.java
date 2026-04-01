@@ -1,5 +1,6 @@
 package dev.evoraces;
 
+
 import dev.evoraces.client.FloatingNumberRegistry;
 import dev.evoraces.client.StatusTextRegistry; // <-- IMPORTANTE
 import dev.evoraces.network.ClientPacketHandler;
@@ -9,12 +10,19 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.evoraces.screen.ModScreenHandlers;
+import dev.evoraces.screen.SteamBoilerScreen;
+import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
+
+
 public class EvoRacesClient implements ClientModInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("evoraces/client");
 
     @Override
     public void onInitializeClient() {
+
         LOGGER.info("[EvoRaces] Client inicializando...");
 
         ClientPacketHandler.register();
@@ -31,5 +39,8 @@ public class EvoRacesClient implements ClientModInitializer {
         ModMessages.registerS2CPackets();
 
         EvoRaces.LOGGER.info("EvoRaces Cliente inicializado e escutando a rede!");
+
+        // Registra a tela visual conectando-a ao nosso Garçom
+        HandledScreens.register(ModScreenHandlers.STEAM_BOILER_SCREEN_HANDLER, SteamBoilerScreen::new);
     }
 }
