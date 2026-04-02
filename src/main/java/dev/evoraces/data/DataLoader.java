@@ -61,6 +61,7 @@ public class DataLoader {
 
                     String raceId = raceObj.get("id").getAsString();
                     String name   = raceObj.get("name").getAsString();
+                    String description = raceObj.has("description") ? raceObj.get("description").getAsString() : "";
 
                     JsonObject attributesObj = raceObj.getAsJsonObject("attributes");
                     RaceAttributes attributes = new RaceAttributes(
@@ -75,7 +76,7 @@ public class DataLoader {
                     List<String> weaknesses     = loadStringList(raceObj, "weaknesses");
                     List<String> evolutionPaths = loadStringList(raceObj, "evolution_paths");
 
-                    Race race = new Race(raceId, name, attributes, abilities, weaknesses, evolutionPaths);
+                    Race race = new Race(raceId, name, description, attributes, abilities, weaknesses, evolutionPaths);
                     registry.registerRace(race);
 
                     EvoRaces.LOGGER.debug("Raça carregada: {} ({})", name, raceId);
