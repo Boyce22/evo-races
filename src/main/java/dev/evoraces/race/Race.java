@@ -9,6 +9,7 @@ import java.util.List;
 public class Race {
     private final String id;
     private final String name;
+    private final String description;
     private final RaceAttributes attributes;
     private final List<String> abilities;
     private final List<String> weaknesses;
@@ -17,8 +18,15 @@ public class Race {
     public Race(String id, String name, RaceAttributes attributes, 
                 List<String> abilities, List<String> weaknesses, 
                 List<String> evolutionPaths) {
+        this(id, name, "", attributes, abilities, weaknesses, evolutionPaths);
+    }
+    
+    public Race(String id, String name, String description, RaceAttributes attributes, 
+                List<String> abilities, List<String> weaknesses, 
+                List<String> evolutionPaths) {
         this.id = id;
         this.name = name;
+        this.description = description;
         this.attributes = attributes;
         this.abilities = abilities;
         this.weaknesses = weaknesses;
@@ -31,6 +39,10 @@ public class Race {
     
     public String getName() {
         return name;
+    }
+    
+    public String getDescription() {
+        return description;
     }
     
     public RaceAttributes getAttributes() {
