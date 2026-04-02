@@ -2,45 +2,52 @@ package dev.evoraces;
 
 
 import dev.evoraces.client.FloatingNumberRegistry;
-import dev.evoraces.client.StatusTextRegistry; // <-- IMPORTANTE
+import dev.evoraces.client.StatusTextRegistry;
+import dev.evoraces.client.race.RaceSelectionManager;
+import dev.evoraces.client.race.RaceSelectionScreen;
 import dev.evoraces.network.ClientPacketHandler;
 import dev.evoraces.network.ModMessages;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dev.evoraces.screen.ModScreenHandlers;
 import dev.evoraces.screen.SteamBoilerScreen;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.minecraft.server.MinecraftServer;
 
+import java.io.File;
 
 public class EvoRacesClient implements ClientModInitializer {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("evoraces/client");
 
     @Override
     public void onInitializeClient() {
 
-        LOGGER.info("[EvoRaces] Client inicializando...");
+        EvoRaces.LOGGER.info("[EvoRaces] Client inicializando...");
 
         ClientPacketHandler.register();
 
-        // Atualizamos os dois sistemas a cada tick do jogo
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             FloatingNumberRegistry.tick();
-            StatusTextRegistry.tick(); // <-- NOVO: Faz os textos sumirem após 2 segundos
+            StatusTextRegistry.tick();
         });
 
-        LOGGER.info("[EvoRaces] Client inicializado.");
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.world != null && client.getServer() != null && !RaceSelectionManager.getInstance().hasReceivedServerData()) {
+                MinecraftServer server = client.getServer();
+                File saveDir = server.getRunDirectory();
+                RaceSelectionManager.getInstance().onWorldJoin(saveDir);
+                
+                if (RaceSelectionManager.getInstance().shouldShowSelection()) {
+                    client.setScreen(new RaceSelectionScreen(client.currentScreen));
+                }
+                
+                RaceSelectionManager.getInstance().setReceivedServerData(true);
+            }
+        });
 
-        // Liga o rádio do Cliente para escutar as mensagens do Servidor
         ModMessages.registerS2CPackets();
 
         EvoRaces.LOGGER.info("EvoRaces Cliente inicializado e escutando a rede!");
 
-        // Registra a tela visual conectando-a ao nosso Garçom
         HandledScreens.register(ModScreenHandlers.STEAM_BOILER_SCREEN_HANDLER, SteamBoilerScreen::new);
     }
 }
