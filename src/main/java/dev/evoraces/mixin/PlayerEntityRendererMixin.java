@@ -16,7 +16,8 @@ public abstract class PlayerEntityRendererMixin {
     @Inject(method = "scale(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/util/math/MatrixStack;F)V", at = @At("HEAD"))
     private void evoraces$scaleDwarf(AbstractClientPlayerEntity player, MatrixStack matrices, float amount, CallbackInfo ci) {
         if (player instanceof PlayerDataHolder) {
-            if ("dwarf".equals(((PlayerDataHolder) player).evoraces$getRaceId())) {
+            var raceId = ((PlayerDataHolder) player).evoraces$getRaceId();
+            if ("dwarf".equals(raceId)) {
                 // Diminui os eixos X, Y e Z para 60%
                 matrices.scale(0.6f, 0.6f, 0.6f);
             }

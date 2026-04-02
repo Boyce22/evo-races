@@ -23,6 +23,15 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
             DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.STRING);
 
     @Unique
+    private String evoraces$lastKnownRace = "";
+
+    @Unique
+    private static final EntityDimensions DWARF_NORMAL = EntityDimensions.fixed(0.5f, 1.1f);
+
+    @Unique
+    private static final EntityDimensions DWARF_CROUCHING = EntityDimensions.changing(0.5f, 0.9f);
+
+    @Unique
     private PlayerEntity evoraces$self() {
         return (PlayerEntity)(Object)this;
     }
@@ -46,9 +55,7 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
     @Inject(method = "getDimensions", at = @At("HEAD"), cancellable = true)
     private void evoraces$getDimensions(EntityPose pose, CallbackInfoReturnable<EntityDimensions> cir) {
         if (!"dwarf".equals(evoraces$getRaceId())) return;
-        cir.setReturnValue(pose == EntityPose.CROUCHING
-                ? EntityDimensions.changing(0.5f, 0.9f)
-                : EntityDimensions.fixed(0.5f, 1.1f));
+        cir.setReturnValue(pose == EntityPose.CROUCHING ? DWARF_CROUCHING : DWARF_NORMAL);
     }
 
     @Inject(method = "getActiveEyeHeight", at = @At("HEAD"), cancellable = true)
@@ -72,26 +79,20 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
-    private void evoraces$tick(CallbackInfo ci) {
+    private void evoraces$tickMovement(CallbackInfo ci) {
         PlayerEntity player = evoraces$self();
         String currentRace = evoraces$getRaceId();
+        if (currentRace == null) currentRace = "";
 
-        // 1. FORÇA BRUTA DE SEGURANÇA (Garante que você é anão nos testes)
-        if (!"dwarf".equals(currentRace)) {
-            evoraces$setRaceId("dwarf");
+        // EVENTO SIMULADO: Só roda quando a raça muda
+        if (!currentRace.equals(evoraces$lastKnownRace)) {
+            evoraces$lastKnownRace = currentRace;
             player.calculateDimensions();
-            return;
+            player.setStepHeight("dwarf".equals(currentRace) ? 0.5f : 0.6f);
         }
 
-        // 2. TRAVA DE PERFORMANCE: Só recalcula se a altura estiver errada
-        // Isso impede que o jogo fique "moendo" CPU desnecessariamente
-        if (player.getDimensions(player.getPose()).height > 1.2f) {
-            player.calculateDimensions();
-        }
-
-        // 3. FÍSICA CONSTANTE
-        player.setStepHeight(0.5f);
-        if (player.isTouchingWater()) {
+        // FÍSICA CONTÍNUA DA ÁGUA (Só para anões)
+        if ("dwarf".equals(currentRace) && player.isTouchingWater()) {
             player.setVelocity(player.getVelocity().multiply(0.6, 0.8, 0.6));
             player.addVelocity(0, -0.01, 0);
         }

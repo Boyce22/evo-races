@@ -4,13 +4,13 @@
   "package": "dev.evoraces.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ServerPlayerEntityMixin",
-    "LivingEntityMixin"
+    "LivingEntityMixin",
+    "ServerPlayerEntityMixin"
   ],
   "client": [
     "LivingEntityRendererMixin",
     "PlayerEntityMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
