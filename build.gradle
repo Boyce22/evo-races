@@ -47,14 +47,15 @@ processResources {
     }
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = project.java_version.toInteger()
+def minJavaVersion = project.java_version.toInteger()
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
     it.options.release = targetJavaVersion
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    toolchain.languageVersion = JavaLanguageVersion.of(minJavaVersion)
     withSourcesJar()
 }
 
