@@ -4,3 +4,4 @@
 *.patch
 build
 run
+RACE_SELECTION.md
