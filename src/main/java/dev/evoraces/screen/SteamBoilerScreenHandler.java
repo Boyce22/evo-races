@@ -23,15 +23,40 @@ public class SteamBoilerScreenHandler extends ScreenHandler {
         this.inventory = inventory;
         inventory.onOpen(playerInventory.player);
 
-        // NOSSOS SLOTS DA MÁQUINA (Coordenadas X e Y da tela)
-        this.addSlot(new Slot(inventory, 0, 80, 11)); // Slot 0: Água (Em cima)
-        this.addSlot(new Slot(inventory, 1, 80, 59)); // Slot 1: Carvão (Embaixo)
-        this.addSlot(new Slot(inventory, 2, 50, 34)); // Slot 2: Frasco Vazio (Esquerda)
-        this.addSlot(new Slot(inventory, 3, 110, 34)); // Slot 3: Frasco de Vapor (Direita)
 
-        // SLOTS DO JOGADOR (Sua mochila e hotbar)
-        addPlayerInventory(playerInventory);
-        addPlayerHotbar(playerInventory);
+// === SLOTS DA MÁQUINA ===
+
+        // Slot 0: Água (Quadrado superior esquerdo)
+        // Reduzimos o X para 35 (para a esquerda) e aumentamos o Y para 21 (para baixo)
+        this.addSlot(new Slot(inventory, 0, 35, 21));
+
+        // Slot 1: Combustível (Quadrado inferior esquerdo)
+        // Mesmo X (35), e descemos o Y para 57
+        this.addSlot(new Slot(inventory, 1, 35, 57));
+
+        // Slot 2: Frasco Vazio (Quadrado superior do lado direito)
+        // Voltamos o X para 116 (que estava centralizado numa foto antiga) e descemos o Y para 21
+        this.addSlot(new Slot(inventory, 2, 116, 21));
+
+        // Slot 3: Saída do Vapor (Embaixo do frasco vazio)
+        this.addSlot(new SteamBoilerOutputSlot(inventory, 3, 116, 57));
+
+
+        // === INVENTÁRIO DO JOGADOR ===
+        int m;
+        int l;
+
+        // Subimos o Y de 99 para 96 para os itens não "caírem" da grade
+        for (m = 0; m < 3; ++m) {
+            for (l = 0; l < 9; ++l) {
+                this.addSlot(new Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 96 + m * 18));
+            }
+        }
+
+        // Subimos o Y da Hotbar de 157 para 154
+        for (m = 0; m < 9; ++m) {
+            this.addSlot(new Slot(playerInventory, m, 8 + m * 18, 154));
+        }
     }
 
     @Override

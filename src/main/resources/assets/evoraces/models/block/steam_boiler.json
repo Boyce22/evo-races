@@ -1,0 +1,8 @@
+{
+  "parent": "block/orientable",
+  "textures": {
+    "top":    "evoraces:block/steam_boiler_top",
+    "front":  "evoraces:block/steam_boiler_front",
+    "side":   "evoraces:block/steam_boiler_side"
+  }
+}

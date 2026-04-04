@@ -10,11 +10,15 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class SteamBoilerScreen extends HandledScreen<SteamBoilerScreenHandler> {
-    // Caminho da imagem que você vai precisar desenhar depois
+
     private static final Identifier TEXTURE = new Identifier(EvoRaces.MOD_ID, "textures/gui/steam_boiler.png");
 
     public SteamBoilerScreen(SteamBoilerScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
+        this.backgroundHeight = 186;
+
+        // Empurra o título "Inventário" para baixo para não sobrepor seus itens
+        this.playerInventoryTitleY = this.backgroundHeight - 94;
     }
 
     @Override

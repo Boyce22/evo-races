@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "evoraces:block/steam_boiler", "y": 180 },
+    "facing=south": { "model": "evoraces:block/steam_boiler" },
+    "facing=west":  { "model": "evoraces:block/steam_boiler", "y": 270 },
+    "facing=east":  { "model": "evoraces:block/steam_boiler", "y": 90  }
+  }
+}

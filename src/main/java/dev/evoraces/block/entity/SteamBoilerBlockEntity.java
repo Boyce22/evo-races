@@ -29,7 +29,7 @@ public class SteamBoilerBlockEntity extends BlockEntity implements NamedScreenHa
         super(ModBlockEntities.STEAM_BOILER_BE, pos, state);
     }
 
-    // Método que SALVA os dados quando você sai do mundo (para os itens não sumirem)
+    // Metodo que SALVA os dados quando você sai do mundo (para os itens não sumirem)
     @Override
     protected void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
@@ -39,7 +39,7 @@ public class SteamBoilerBlockEntity extends BlockEntity implements NamedScreenHa
         nbt.putInt("steam_boiler.maxFuelTime", maxFuelTime);
     }
 
-    // Método que LÊ os dados quando você entra no mundo
+    // Metodo que LÊ os dados quando você entra no mundo
     @Override
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
