@@ -71,6 +71,47 @@
       "abilities": ["levitation", "nature_blessing", "pixie_dust"],
       "weaknesses": ["iron_allergy", "low_health"],
       "evolution_paths": ["pixie", "nature_spirit", "titania_guard"]
+    },
+    {
+      "id": "gnome",
+      "name": "Gnome",
+      "description": "Pequena criatura mágica com asas translúcidas. Possui grande domínio sobre poções e cura, mas é extremamente frágil fisicamente.",
+      "attributes": {
+        "vitality": 50,
+        "strength": 40,
+        "agility": 140,
+        "intellect": 130,
+        "resistance": 40
+      },
+      "abilities": [
+        "levitation",
+        "nature_blessing",
+        "pixie_dust"
+      ],
+      "weaknesses": [
+        "iron_allergy",
+        "low_health"
+      ],
+      "evolution_paths": [
+        "pixie",
+        "nature_spirit",
+        "titania_guard"
+      ]
+    },
+    {
+      "id": "default",
+      "name": "default",
+      "description": "raça pré escolha",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": ["x"],
+      "weaknesses": ["x"],
+      "evolution_paths": ["x"]
     }
   ]
 }

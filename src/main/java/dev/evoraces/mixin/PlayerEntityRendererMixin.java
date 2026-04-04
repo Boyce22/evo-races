@@ -18,10 +18,11 @@ public abstract class PlayerEntityRendererMixin {
         if (player instanceof PlayerDataHolder) {
             var raceId = ((PlayerDataHolder) player).evoraces$getRaceId();
             if ("dwarf".equals(raceId)) {
-                // Diminui os eixos X, Y e Z para 60%
                 matrices.scale(0.75f, 0.75f, 0.75f);
             } else if ("fairy".equals(raceId)) {
                 matrices.scale(0.55f, 0.55f, 0.55f);
+            } else if ("gnome".equals(raceId)) {
+                matrices.scale (0.55f, 0.55f, 0.55f);
             }
         }
     }
