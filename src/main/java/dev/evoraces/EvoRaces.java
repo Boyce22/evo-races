@@ -7,7 +7,7 @@ import dev.evoraces.command.RaceCommand;
 import dev.evoraces.data.DataLoader;
 import dev.evoraces.item.ModItems;
 import dev.evoraces.network.ModMessages;
-import dev.evoraces.player.PlayerData;
+import dev.evoraces.player.PlayerDataHolder;
 import dev.evoraces.screen.ModScreenHandlers;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -55,8 +55,12 @@ public class EvoRaces implements ModInitializer {
     }
 
     private void registerDisconnectEvent() {
-        ServerPlayConnectionEvents.DISCONNECT
-                .register((handler, server) -> AttributeSystem.onPlayerDisconnect(handler.player.getUuid()));
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            ServerPlayerEntity player = handler.player;
+            if (player != null) {
+                AttributeSystem.removeAllRaceAttributes(player);
+            }
+        });
         LOGGER.info("Evento de desconexão registrado");
     }
 
@@ -76,7 +80,7 @@ public class EvoRaces implements ModInitializer {
     }
 
     private void onPlayerLoad(ServerPlayerEntity player) {
-        String raceId = PlayerData.getRaceId(player);
+        String raceId = ((PlayerDataHolder) player).evoraces$getRaceId();
         player.calculateDimensions();
         ModMessages.sendRaceSync(player, raceId);
     }

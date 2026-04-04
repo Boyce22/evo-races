@@ -1,7 +1,10 @@
 package dev.evoraces.mixin;
 
+import dev.evoraces.attribute.AttributeModifiers;
 import dev.evoraces.player.PlayerDataHolder;
+import dev.evoraces.race.Race;
 import dev.evoraces.race.RaceEvents;
+import dev.evoraces.race.RaceRegistry;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.data.DataTracker;
@@ -17,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Optional;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin implements PlayerDataHolder {
@@ -48,9 +53,12 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
 
     @Unique
     private boolean evoraces$isDwarf = false;
-    
+
     @Unique
     private boolean evoraces$isFairy = false;
+
+    @Unique
+    private int evoraces$regenTick = 0;
 
     @Unique
     private PlayerEntity evoraces$self() {
@@ -119,7 +127,7 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
 
     @Inject(method = "getActiveEyeHeight", at = @At("HEAD"), cancellable = true)
     private void evoraces$getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions,
-            CallbackInfoReturnable<Float> cir) {
+                                             CallbackInfoReturnable<Float> cir) {
         if (evoraces$getRaceId() == null)
             return;
         cir.setReturnValue(evoraces$calculateEyeHeight(pose, dimensions));
@@ -154,6 +162,7 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
         PlayerEntity self = evoraces$self();
         if (self.getWorld() != null && !self.getWorld().isClient) {
             evoraces$applyRacePhysics();
+            evoraces$tickRegeneration();  // regeneração adicionada
         }
     }
 
@@ -203,5 +212,37 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
             return;
 
         player.setVelocity(vel.x, vel.y * 0.6, vel.z);
+    }
+
+    @Unique
+    private void evoraces$tickRegeneration() {
+        Optional<Race> optRace = evoraces$getCurrentRace();
+        if (optRace.isEmpty()) return;
+
+        Race race = optRace.get();
+        int vitality = race.getAttributes().getVitality();
+        int interval = AttributeModifiers.calculateRegenInterval(vitality);
+
+        if (interval == Integer.MAX_VALUE) return;
+
+        evoraces$regenTick++;
+        if (evoraces$regenTick >= interval) {
+            PlayerEntity self = evoraces$self();
+            if (self.getHealth() < self.getMaxHealth() && self.getHungerManager().getFoodLevel() > 6) {
+                self.heal(0.5f);
+            }
+            evoraces$regenTick = 0;
+        }
+    }
+
+    @Unique
+    private Optional<Race> evoraces$getCurrentRace() {
+        String raceId = evoraces$getRaceId();
+        if (raceId == null) return Optional.empty();
+
+        RaceRegistry registry = RaceRegistry.getInstance();
+        if (!registry.hasRace(raceId)) return Optional.empty();
+
+        return Optional.of(registry.getRace(raceId));
     }
 }
