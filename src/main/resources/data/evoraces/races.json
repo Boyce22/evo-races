@@ -1,147 +1,138 @@
 {
   "races": [
     {
+      "id": "human",
+      "name": "Humano",
+      "description": "Versátil e adaptável",
+      "attributes": {
+        "vitality": 5,
+        "strength": 5,
+        "agility": 5,
+        "intellect": 5,
+        "resistance": 5,
+        "dexterity": 5,
+        "luck": 5
+      }
+    },
+    {
       "id": "dwarf",
       "name": "Anão",
-      "description": "Povo robusto e honrado, nascido das montanhas.",
+      "description": "Resistente e forte, mas lento",
       "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 100,
-        "resistance": 100
+        "vitality": 10,
+        "strength": 8,
+        "agility": 3,
+        "intellect": 2,
+        "resistance": 8,
+        "dexterity": 3,
+        "luck": 4
       },
-      "effects": [
+      "buffs": [
         {
           "type": "cave_bonus",
           "threshold_y": 40,
           "speed": 0.05,
           "haste": 2
         }
-      ],
-      "abilities": [],
-      "weaknesses": [],
-      "evolution_paths": []
+      ]
     },
     {
       "id": "elf",
       "name": "Elfo",
-      "description": "Seres ágeis de sentidos aguçados, ligados à magia primitiva da natureza",
+      "description": "Ágil e preciso com arcos",
       "attributes": {
-        "vitality": 90,
-        "strength": 100,
-        "agility": 125,
-        "intellect": 110,
-        "resistance": 70
-      },
-      "abilities": [],
-      "weaknesses": [],
-      "evolution_paths": []
+        "vitality": 4,
+        "strength": 4,
+        "agility": 8,
+        "intellect": 6,
+        "resistance": 4,
+        "dexterity": 10,
+        "luck": 3
+      }
     },
     {
       "id": "fairy",
       "name": "Fada",
-      "description": "Criaturas pequenas e aladas, dominam ilusões e encantamentos, mas são frágeis como pétalas.",
+      "description": "Frágil mas poderosa magicamente",
       "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 100,
-        "resistance": 100
-      },
-      "abilities": [],
-      "weaknesses": [],
-      "evolution_paths": []
-    },
-    {
-      "id": "feline",
-      "name": "Felino",
-      "description": "Nômades curiosos que movem-se em silêncio como sombras com reflexos fulminantes",
-      "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 100,
-        "resistance": 100
-      },
-      "abilities": [],
-      "weaknesses": [],
-      "evolution_paths": []
+        "vitality": 2,
+        "strength": 1,
+        "agility": 10,
+        "intellect": 12,
+        "resistance": 2,
+        "dexterity": 5,
+        "luck": 5
+      }
     },
     {
       "id": "gnome",
       "name": "Gnomo",
-      "description": "Pequenos inventores e ilusionistas, adoram pregar peças mágicas.",
+      "description": "Inteligente e sortudo",
       "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 100,
-        "resistance": 100
-      },
-      "abilities": [],
-      "weaknesses": [],
-      "evolution_paths": []
+        "vitality": 4,
+        "strength": 3,
+        "agility": 5,
+        "intellect": 8,
+        "resistance": 4,
+        "dexterity": 4,
+        "luck": 10
+      }
     },
     {
-      "id": "human",
-      "name": "Humano",
-      "description": "Raça ambiciosa e adaptável, de curta vida mas imenso potencial.",
+      "id": "feline",
+      "name": "Felino",
+      "description": "Extremamente ágil e letal",
       "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 100,
-        "resistance": 100
-      },
-      "abilities": [],
-      "weaknesses": [],
-      "evolution_paths": []
+        "vitality": 4,
+        "strength": 6,
+        "agility": 12,
+        "intellect": 3,
+        "resistance": 4,
+        "dexterity": 8,
+        "luck": 6
+      }
     },
     {
       "id": "tiefling",
       "name": "Tiefling",
-      "description": "Ser de linhagem infernal, com resistência a fogo e afinidade com magias sombrias.",
+      "description": "Herança infernal mágica",
       "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 100,
-        "resistance": 100
-      },
-      "abilities": [],
-      "weaknesses": [],
-      "evolution_paths": []
+        "vitality": 6,
+        "strength": 5,
+        "agility": 6,
+        "intellect": 7,
+        "resistance": 6,
+        "dexterity": 5,
+        "luck": 7
+      }
     },
     {
       "id": "orc",
       "name": "Orc",
-      "description": "Raça bruta e poderosa, especialista em combate corpo a corpo e resistência física.",
+      "description": "Força bruta brutal",
       "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 100,
-        "resistance": 100
-      },
-      "abilities": [],
-      "weaknesses": [],
-      "evolution_paths": []
+        "vitality": 9,
+        "strength": 12,
+        "agility": 3,
+        "intellect": 1,
+        "resistance": 9,
+        "dexterity": 2,
+        "luck": 2
+      }
     },
     {
       "id": "default",
-      "name": "Default",
-      "description": "Raça padrão, sem modificadores.",
+      "name": "Padrão",
+      "description": "Sem bônus raciais",
       "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 100,
-        "resistance": 100
-      },
-      "abilities": [],
-      "weaknesses": [],
-      "evolution_paths": []
+        "vitality": 3,
+        "strength": 3,
+        "agility": 3,
+        "intellect": 3,
+        "resistance": 3,
+        "dexterity": 3,
+        "luck": 3
+      }
     }
   ]
 }

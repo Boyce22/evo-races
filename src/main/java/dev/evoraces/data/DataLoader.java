@@ -25,10 +25,8 @@ import java.util.List;
 public class DataLoader {
 
     private static final Gson GSON = new Gson();
-
     private static final String LEGACY_FILE = "races.json";
     private static final String NBT_KEY_RACES = "races";
-
     private static final Identifier FABRIC_ID = new Identifier(EvoRaces.MOD_ID, "data_loader");
 
     public static void register() {
@@ -95,12 +93,18 @@ public class DataLoader {
     }
 
     private static RaceAttributes parseAttributes(JsonObject obj) {
-        return new RaceAttributes(
-                obj.get("vitality").getAsInt(),
-                obj.get("strength").getAsInt(),
-                obj.get("agility").getAsInt(),
-                obj.get("intellect").getAsInt(),
-                obj.get("resistance").getAsInt());
+
+        int vitality = obj.get("vitality").getAsInt();
+        int strength = obj.get("strength").getAsInt();
+        int agility = obj.get("agility").getAsInt();
+        int intellect = obj.get("intellect").getAsInt();
+        int resistance = obj.get("resistance").getAsInt();
+
+        // Atributos opcionais
+        int dexterity = obj.has("dexterity") ? obj.get("dexterity").getAsInt() : 100;
+        int luck = obj.has("luck") ? obj.get("luck").getAsInt() : 100;
+
+        return new RaceAttributes(vitality, strength, agility, intellect, resistance, dexterity, luck);
     }
 
     private static List<RacialBuff> parseBuffs(JsonObject raceObj) {
@@ -112,15 +116,15 @@ public class DataLoader {
 
         for (int i = 0; i < array.size(); i++) {
             JsonObject effectObj = array.get(i).getAsJsonObject();
-            RacialBuff effect = parseEffect(effectObj);
-            if (effect != null)
-                buffs.add(effect);
+            RacialBuff buff = parseBuff(effectObj);
+            if (buff != null)
+                buffs.add(buff);
         }
 
         return buffs;
     }
 
-    private static RacialBuff parseEffect(JsonObject obj) {
+    private static RacialBuff parseBuff(JsonObject obj) {
         String type = obj.get("type").getAsString();
         return switch (type) {
             case "cave_bonus" -> new CaveSpeedBuff(
@@ -128,7 +132,7 @@ public class DataLoader {
                     obj.get("threshold_y").getAsInt(),
                     obj.get("haste").getAsInt());
             default -> {
-                EvoRaces.LOGGER.warn("EvoRaces - 'Data loader' Tipo de efeito desconhecido: '{}'", type);
+                EvoRaces.LOGGER.warn("EvoRaces - 'Data loader' Tipo de buff desconhecido: '{}'", type);
                 yield null;
             }
         };
@@ -139,7 +143,6 @@ public class DataLoader {
             return Collections.emptyList();
 
         JsonArray array = parent.getAsJsonArray(key);
-
         List<String> list = new ArrayList<>(array.size());
 
         for (int i = 0; i < array.size(); i++) {
