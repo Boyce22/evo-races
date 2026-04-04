@@ -71,6 +71,14 @@
         "intellect": 100,
         "resistance": 100
       },
+      "effects": [
+        {
+          "type": "cave_bonus",
+          "threshold_y": 40,
+          "speed": 0.05,
+          "haste": 2
+        }
+      ],
       "abilities": [],
       "weaknesses": [],
       "evolution_paths": []

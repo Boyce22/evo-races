@@ -22,68 +22,74 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class LivingEntityMixin {
 
     @Unique
-    private long lastDamageTick = -1L;
+    private static final int CRITICAL_COLOR = 0xFFFFD700;
 
     @Unique
-    private long lastHealTick = -1L;
+    private static final String CRITICAL_LABEL = "CRITICAL";
+
+    @Unique
+    private static final long UNSET_TICK = -1L;
+
+    @Unique
+    private static final long MIN_TICK_INTERVAL = 1L;
+
+    @Unique
+    private long lastDamageTick = UNSET_TICK;
+    
+    @Unique
+    private long lastHealTick = UNSET_TICK;
 
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        LivingEntity entity = (LivingEntity) (Object) this;
-
-        if (!isValidDamageEvent(entity, amount)) return;
+        LivingEntity entity = self();
+        if (!isValidDamageEvent(entity, amount))
+            return;
 
         boolean isCrit = isCriticalHit(source);
         DamageVisuals visuals = resolveVisuals(source, isCrit);
-
         DamagePayload damagePayload = new DamagePayload(entity.getId(), amount, isCrit);
-        EffectPayload effectPayload = createEffectPayload(entity.getId(), visuals, isCrit);
+        EffectPayload effectPayload = buildEffectPayload(entity.getId(), visuals, isCrit);
 
-        dispatchPayloads(entity, damagePayload, effectPayload);
+        dispatchDamageToTrackers(entity, damagePayload, effectPayload);
     }
 
     @Inject(method = "heal", at = @At("HEAD"))
     private void onHeal(float amount, CallbackInfo ci) {
-        LivingEntity entity = (LivingEntity) (Object) this;
+        LivingEntity entity = self();
+        if (!isValidHealEvent(entity, amount))
+            return;
 
-        if (entity.getWorld().isClient() || amount <= 0 || entity.getHealth() >= entity.getMaxHealth()) return;
-
-        long currentTick = entity.getWorld().getTime();
-        if (lastHealTick != -1 && currentTick - lastHealTick < 1) return;
-        lastHealTick = currentTick;
-
-        HealPayload payload = new HealPayload(entity.getId(), amount);
-
-        for (ServerPlayerEntity trackingPlayer : PlayerLookup.tracking(entity)) {
-            ServerPlayNetworking.send(trackingPlayer, payload);
-        }
-
-        if (entity instanceof ServerPlayerEntity self) {
-            ServerPlayNetworking.send(self, payload);
-        }
+        dispatchHealToTrackers(entity, new HealPayload(entity.getId(), amount));
     }
 
-    /**
-     * Valida se o dano deve ser processado (ignora lado cliente, dano nulo ou ‘spam’ de ticks).
-     */
     @Unique
     private boolean isValidDamageEvent(LivingEntity entity, float amount) {
-        if (entity.getWorld().isClient() || amount <= 0) return false;
-
+        if (entity.getWorld().isClient() || amount <= 0)
+            return false;
         long currentTick = entity.getWorld().getTime();
-        if (lastDamageTick != -1 && currentTick - lastDamageTick < 1) return false;
-
+        if (lastDamageTick != UNSET_TICK && currentTick - lastDamageTick < MIN_TICK_INTERVAL)
+            return false;
         lastDamageTick = currentTick;
         return true;
     }
 
-    /**
-     * Isola as regras complexas de acerto crítico físico do Vanilla.
-     */
+    @Unique
+    private boolean isValidHealEvent(LivingEntity entity, float amount) {
+        if (entity.getWorld().isClient())
+            return false;
+        if (amount <= 0 || entity.getHealth() >= entity.getMaxHealth())
+            return false;
+        long currentTick = entity.getWorld().getTime();
+        if (lastHealTick != UNSET_TICK && currentTick - lastHealTick < MIN_TICK_INTERVAL)
+            return false;
+        lastHealTick = currentTick;
+        return true;
+    }
+
     @Unique
     private boolean isCriticalHit(DamageSource source) {
-        if (!(source.getAttacker() instanceof PlayerEntity player)) return false;
-
+        if (!(source.getAttacker() instanceof PlayerEntity player))
+            return false;
         return player.fallDistance > 0.0F
                 && !player.isOnGround()
                 && !player.isClimbing()
@@ -91,43 +97,47 @@ public abstract class LivingEntityMixin {
                 && !player.hasVehicle();
     }
 
-    /**
-     * Resolve o que será exibido (seja o crítico nativo ou um dano mapeado).
-     */
     @Unique
     private DamageVisuals resolveVisuals(DamageSource source, boolean isCrit) {
-        if (isCrit) {
-            return new DamageVisuals("CRITICAL", 0xFFFFD700);
-        }
-        return DamageTypeUtils.getVisuals(source);
+        return isCrit
+                ? new DamageVisuals(CRITICAL_LABEL, CRITICAL_COLOR)
+                : DamageTypeUtils.getVisuals(source);
     }
 
-    /**
-     * Fabrica o payload de efeito apenas se houver visuais para exibir.
-     */
     @Unique
-    private EffectPayload createEffectPayload(int entityId, DamageVisuals visuals, boolean isCrit) {
-        if (visuals == null) return null;
+    private EffectPayload buildEffectPayload(int entityId, DamageVisuals visuals, boolean isCrit) {
+        if (visuals == null)
+            return null;
         return new EffectPayload(entityId, visuals.text(), visuals.color(), isCrit);
     }
 
-    /**
-     * Centraliza a lógica de envio de pacotes na rede (rastreados e autorrastreio).
-     */
     @Unique
-    private void dispatchPayloads(LivingEntity entity, DamagePayload damagePayload, EffectPayload effectPayload) {
-        for (ServerPlayerEntity trackingPlayer : PlayerLookup.tracking(entity)) {
-            ServerPlayNetworking.send(trackingPlayer, damagePayload);
-            if (effectPayload != null) {
-                ServerPlayNetworking.send(trackingPlayer, effectPayload);
-            }
+    private void dispatchDamageToTrackers(LivingEntity entity, DamagePayload damagePayload,
+            EffectPayload effectPayload) {
+        for (ServerPlayerEntity tracker : PlayerLookup.tracking(entity)) {
+            ServerPlayNetworking.send(tracker, damagePayload);
+            if (effectPayload != null)
+                ServerPlayNetworking.send(tracker, effectPayload);
         }
-
         if (entity instanceof ServerPlayerEntity self) {
             ServerPlayNetworking.send(self, damagePayload);
-            if (effectPayload != null) {
+            if (effectPayload != null)
                 ServerPlayNetworking.send(self, effectPayload);
-            }
         }
+    }
+
+    @Unique
+    private void dispatchHealToTrackers(LivingEntity entity, HealPayload payload) {
+        for (ServerPlayerEntity tracker : PlayerLookup.tracking(entity)) {
+            ServerPlayNetworking.send(tracker, payload);
+        }
+        if (entity instanceof ServerPlayerEntity self) {
+            ServerPlayNetworking.send(self, payload);
+        }
+    }
+
+    @Unique
+    private LivingEntity self() {
+        return (LivingEntity) (Object) this;
     }
 }

@@ -2,10 +2,8 @@ package dev.evoraces.race;
 
 import java.util.List;
 
-/**
- * Representa uma raça no sistema EvoRaces.
- * Cada raça possui atributos base, habilidades iniciais, fraquezas e caminhos de evolução.
- */
+import dev.evoraces.race.effect.RacialEffect;
+
 public class Race {
     private final String id;
     private final String name;
@@ -13,16 +11,22 @@ public class Race {
     private final List<String> abilities;
     private final List<String> weaknesses;
     private final List<String> evolutionPaths;
+    private final List<RacialEffect> racialEffects;
     
     public Race(String id, String name, RaceAttributes attributes, 
                 List<String> abilities, List<String> weaknesses, 
-                List<String> evolutionPaths) {
+                List<String> evolutionPaths, List<RacialEffect> racialEffects) {
         this.id = id;
         this.name = name;
         this.attributes = attributes;
         this.abilities = abilities;
         this.weaknesses = weaknesses;
         this.evolutionPaths = evolutionPaths;
+        this.racialEffects = racialEffects;
+    }
+    
+    public List<RacialEffect> getRacialEffects() {
+        return racialEffects;
     }
     
     public String getId() {
