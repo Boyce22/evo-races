@@ -7,8 +7,8 @@ import dev.evoraces.EvoRaces;
 import dev.evoraces.race.Race;
 import dev.evoraces.race.RaceAttributes;
 import dev.evoraces.race.RaceRegistry;
-import dev.evoraces.race.effect.CaveSpeedEffect;
-import dev.evoraces.race.effect.RacialEffect;
+import dev.evoraces.race.buffs.CaveSpeedBuff;
+import dev.evoraces.race.buffs.RacialBuff;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.Resource;
@@ -84,9 +84,9 @@ public class DataLoader {
             List<String> abilities = parseStringList(obj, "abilities");
             List<String> weaknesses = parseStringList(obj, "weaknesses");
             List<String> evolutionPaths = parseStringList(obj, "evolution_paths");
-            List<RacialEffect> effects = parseEffects(obj);
+            List<RacialBuff> buffs = parseBuffs(obj);
 
-            registry.registerRace(new Race(raceId, name, attributes, abilities, weaknesses, evolutionPaths, effects));
+            registry.registerRace(new Race(raceId, name, attributes, abilities, weaknesses, evolutionPaths, buffs));
             EvoRaces.LOGGER.debug("EvoRaces - 'Data loader' Raça registrada: {} ({})", name, raceId);
 
         } catch (Exception e) {
@@ -103,27 +103,27 @@ public class DataLoader {
                 obj.get("resistance").getAsInt());
     }
 
-    private static List<RacialEffect> parseEffects(JsonObject raceObj) {
-        if (!hasArray(raceObj, "effects"))
+    private static List<RacialBuff> parseBuffs(JsonObject raceObj) {
+        if (!hasArray(raceObj, "buffs"))
             return Collections.emptyList();
 
-        JsonArray array = raceObj.getAsJsonArray("effects");
-        List<RacialEffect> effects = new ArrayList<>(array.size());
+        JsonArray array = raceObj.getAsJsonArray("buffs");
+        List<RacialBuff> buffs = new ArrayList<>(array.size());
 
         for (int i = 0; i < array.size(); i++) {
             JsonObject effectObj = array.get(i).getAsJsonObject();
-            RacialEffect effect = parseEffect(effectObj);
+            RacialBuff effect = parseEffect(effectObj);
             if (effect != null)
-                effects.add(effect);
+                buffs.add(effect);
         }
 
-        return effects;
+        return buffs;
     }
 
-    private static RacialEffect parseEffect(JsonObject obj) {
+    private static RacialBuff parseEffect(JsonObject obj) {
         String type = obj.get("type").getAsString();
         return switch (type) {
-            case "cave_bonus" -> new CaveSpeedEffect(
+            case "cave_bonus" -> new CaveSpeedBuff(
                     obj.get("speed").getAsDouble(),
                     obj.get("threshold_y").getAsInt(),
                     obj.get("haste").getAsInt());
