@@ -28,11 +28,11 @@
       "name": "Elfo",
       "description": "Seres ágeis de sentidos aguçados, ligados à magia primitiva da natureza",
       "attributes": {
-        "vitality": 100,
+        "vitality": 90,
         "strength": 100,
-        "agility": 100,
-        "intellect": 100,
-        "resistance": 100
+        "agility": 125,
+        "intellect": 110,
+        "resistance": 70
       },
       "abilities": [],
       "weaknesses": [],

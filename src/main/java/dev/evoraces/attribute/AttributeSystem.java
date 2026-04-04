@@ -5,7 +5,7 @@ import dev.evoraces.player.PlayerData;
 import dev.evoraces.race.Race;
 import dev.evoraces.race.RaceEvents;
 import dev.evoraces.race.RaceRegistry;
-import dev.evoraces.race.effect.RacialEffect;
+import dev.evoraces.race.buffs.RacialBuff;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -21,7 +21,7 @@ public class AttributeSystem {
     public static void register() {
         registerRaceChangeEvent();
         registerTickEvent();
-        EvoRaces.LOGGER.info("AttributeSystem registrado (Suporte a Efeitos Genéricos)");
+        EvoRaces.LOGGER.info("AttributeSystem registrado (Suporte a Buffs Genéricos)");
     }
 
     public static void onPlayerDisconnect(UUID playerId) {
@@ -40,16 +40,16 @@ public class AttributeSystem {
         if (!registry.hasRace(raceId)) return;
 
         Race race = registry.getRace(raceId);
-        for (RacialEffect effect : race.getRacialEffects()) {
-            effect.tick(player);
+        for (RacialBuff buff : race.getRacialBuffs()) {
+            buff.tick(player);
         }
     }
 
     private static void registerRaceChangeEvent() {
         RaceEvents.ON_RACE_CHANGE.register((player, oldRaceId, newRaceId) -> {
-            removeOldRaceEffects(player, oldRaceId);
+            removeOldRaceBuffs(player, oldRaceId);
             applyRaceAttributes(player, newRaceId);
-            applyNewRaceEffects(player, newRaceId);
+            applyNewRaceBuffs(player, newRaceId);
         });
     }
 
@@ -61,17 +61,17 @@ public class AttributeSystem {
         });
     }
 
-    private static void removeOldRaceEffects(ServerPlayerEntity player, String oldRaceId) {
+    private static void removeOldRaceBuffs(ServerPlayerEntity player, String oldRaceId) {
         if (!isValidRace(oldRaceId)) return;
-        for (RacialEffect effect : RaceRegistry.getInstance().getRace(oldRaceId).getRacialEffects()) {
-            effect.remove(player);
+        for (RacialBuff buff : RaceRegistry.getInstance().getRace(oldRaceId).getRacialBuffs()) {
+            buff.remove(player);
         }
     }
 
-    private static void applyNewRaceEffects(ServerPlayerEntity player, String newRaceId) {
+    private static void applyNewRaceBuffs(ServerPlayerEntity player, String newRaceId) {
         if (!isValidRace(newRaceId)) return;
-        for (RacialEffect effect : RaceRegistry.getInstance().getRace(newRaceId).getRacialEffects()) {
-            effect.apply(player);
+        for (RacialBuff buff : RaceRegistry.getInstance().getRace(newRaceId).getRacialBuffs()) {
+            buff.apply(player);
         }
     }
 

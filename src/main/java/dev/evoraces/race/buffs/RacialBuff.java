@@ -1,11 +1,11 @@
-package dev.evoraces.race.effect;
+package dev.evoraces.race.buffs;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 
 /**
  * Interface base para efeitos de raça que podem ser aplicados, removidos ou processados a cada tick.
  */
-public interface RacialEffect {
+public interface RacialBuff {
     /**
      * Chamado quando a raça é aplicada ao jogador.
      */

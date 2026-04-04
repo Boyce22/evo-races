@@ -1,4 +1,4 @@
-package dev.evoraces.race.effect;
+package dev.evoraces.race.buffs;
 
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -9,7 +9,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.UUID;
 
-public class CaveSpeedEffect implements RacialEffect {
+public class CaveSpeedBuff implements RacialBuff {
 
     private static final UUID CAVE_SPEED_MODIFIER_UUID = UUID.fromString("c0ffee00-0000-0000-0000-000000000000");
     private static final String MODIFIER_NAME = "Racial Cave Bonus";
@@ -19,7 +19,7 @@ public class CaveSpeedEffect implements RacialEffect {
     private final int thresholdY;
     private final int hasteLevel;
 
-    public CaveSpeedEffect(double speedBonus, int thresholdY, int hasteLevel) {
+    public CaveSpeedBuff(double speedBonus, int thresholdY, int hasteLevel) {
         this.speedBonus = speedBonus;
         this.thresholdY = thresholdY;
         this.hasteLevel = hasteLevel;
@@ -27,7 +27,7 @@ public class CaveSpeedEffect implements RacialEffect {
 
     @Override
     public void apply(ServerPlayerEntity player) {
-        // Efeito aplicado reativamente no tick; nenhuma ação necessária na inicialização
+        // Buff aplicado no tick
     }
 
     @Override
@@ -42,9 +42,9 @@ public class CaveSpeedEffect implements RacialEffect {
         if (speedAttr == null) return;
 
         if (isInsideCave(player)) {
-            applyCaveEffects(player, speedAttr);
+            applyCaveBuffs(player, speedAttr);
         } else {
-            removeCaveSpeedBonus(speedAttr);
+            removeCaveSpeedBuff(speedAttr);
         }
     }
 
@@ -52,12 +52,12 @@ public class CaveSpeedEffect implements RacialEffect {
         return player.getY() < thresholdY;
     }
 
-    private void applyCaveEffects(ServerPlayerEntity player, EntityAttributeInstance speedAttr) {
-        applySpeedBonus(speedAttr);
-        applyHaste(player);
+    private void applyCaveBuffs(ServerPlayerEntity player, EntityAttributeInstance speedAttr) {
+        applySpeedBuff(speedAttr);
+        applyHasteBuff(player);
     }
 
-    private void applySpeedBonus(EntityAttributeInstance speedAttr) {
+    private void applySpeedBuff(EntityAttributeInstance speedAttr) {
         boolean alreadyApplied = speedAttr.getModifier(CAVE_SPEED_MODIFIER_UUID) != null;
         if (alreadyApplied) return;
 
@@ -69,7 +69,7 @@ public class CaveSpeedEffect implements RacialEffect {
         ));
     }
 
-    private void applyHaste(ServerPlayerEntity player) {
+    private void applyHasteBuff(ServerPlayerEntity player) {
         if (hasteLevel <= 0) return;
 
         player.addStatusEffect(new StatusEffectInstance(
@@ -80,8 +80,8 @@ public class CaveSpeedEffect implements RacialEffect {
         ));
     }
 
-    private void removeCaveSpeedBonus(EntityAttributeInstance speedAttr) {
-        boolean hasBonus = speedAttr.getModifier(CAVE_SPEED_MODIFIER_UUID) != null;
-        if (hasBonus) speedAttr.removeModifier(CAVE_SPEED_MODIFIER_UUID);
+    private void removeCaveSpeedBuff(EntityAttributeInstance speedAttr) {
+        boolean hasBuff = speedAttr.getModifier(CAVE_SPEED_MODIFIER_UUID) != null;
+        if (hasBuff) speedAttr.removeModifier(CAVE_SPEED_MODIFIER_UUID);
     }
 }
