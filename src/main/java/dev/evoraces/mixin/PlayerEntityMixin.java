@@ -25,11 +25,18 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
     @Unique
     private String evoraces$lastKnownRace = "";
 
+    // --- DIMENSÕES DO ANÃO ---
     @Unique
     private static final EntityDimensions DWARF_NORMAL = EntityDimensions.fixed(0.5f, 1.1f);
-
     @Unique
     private static final EntityDimensions DWARF_CROUCHING = EntityDimensions.changing(0.5f, 0.9f);
+
+    // --- DIMENSÕES DA FADA ---
+    @Unique
+    private static final EntityDimensions FAIRY_NORMAL = EntityDimensions.fixed(0.33f, 0.99f);
+
+    @Unique
+    private static final EntityDimensions FAIRY_CROUCHING = EntityDimensions.changing(0.33f, 0.82f);
 
     @Unique
     private PlayerEntity evoraces$self() {
@@ -38,6 +45,7 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
 
     @Inject(method = "initDataTracker", at = @At("TAIL"))
     private void evoraces$initDataTracker(CallbackInfo ci) {
+        // Mude para "fairy" aqui se quiser testar a fada direto no spawn
         evoraces$self().getDataTracker().startTracking(EVORACES_RACE_ID, "dwarf");
     }
 
@@ -54,15 +62,24 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
 
     @Inject(method = "getDimensions", at = @At("HEAD"), cancellable = true)
     private void evoraces$getDimensions(EntityPose pose, CallbackInfoReturnable<EntityDimensions> cir) {
-        if (!"dwarf".equals(evoraces$getRaceId())) return;
-        cir.setReturnValue(pose == EntityPose.CROUCHING ? DWARF_CROUCHING : DWARF_NORMAL);
+        String race = evoraces$getRaceId();
+
+        if ("dwarf".equals(race)) {
+            cir.setReturnValue(pose == EntityPose.CROUCHING ? DWARF_CROUCHING : DWARF_NORMAL);
+        } else if ("fairy".equals(race)) {
+            cir.setReturnValue(pose == EntityPose.CROUCHING ? FAIRY_CROUCHING : FAIRY_NORMAL);
+        }
     }
 
     @Inject(method = "getActiveEyeHeight", at = @At("HEAD"), cancellable = true)
-    private void evoraces$getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions,
-                                             CallbackInfoReturnable<Float> cir) {
-        if (!"dwarf".equals(evoraces$getRaceId())) return;
-        cir.setReturnValue(pose == EntityPose.CROUCHING ? 0.80f : 0.98f);
+    private void evoraces$getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions, CallbackInfoReturnable<Float> cir) {
+        String race = evoraces$getRaceId();
+
+        if ("dwarf".equals(race)) {
+            cir.setReturnValue(pose == EntityPose.CROUCHING ? 0.80f : 0.98f);
+        } else if ("fairy".equals(race)) {
+            cir.setReturnValue(pose == EntityPose.CROUCHING ? 0.74f : 0.9f);
+        }
     }
 
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
@@ -84,17 +101,34 @@ public abstract class PlayerEntityMixin implements PlayerDataHolder {
         String currentRace = evoraces$getRaceId();
         if (currentRace == null) currentRace = "";
 
-        // EVENTO SIMULADO: Só roda quando a raça muda
+        // Sincroniza dimensões quando a raça muda
         if (!currentRace.equals(evoraces$lastKnownRace)) {
             evoraces$lastKnownRace = currentRace;
             player.calculateDimensions();
-            player.setStepHeight("dwarf".equals(currentRace) ? 0.5f : 0.6f);
+
+            // Step height (altura do degrau que sobe sem pular)
+            if ("dwarf".equals(currentRace)) {
+                player.setStepHeight(0.5f);
+            } else if ("fairy".equals(currentRace)) {
+                player.setStepHeight(0.4f);
+            } else {
+                player.setStepHeight(0.6f);
+            }
         }
 
-        // FÍSICA CONTÍNUA DA ÁGUA (Só para anões)
+        // --- FÍSICA ESPECÍFICA ---
+
+        // 1. Anão na água (Lógica original mantida)
         if ("dwarf".equals(currentRace) && player.isTouchingWater()) {
             player.setVelocity(player.getVelocity().multiply(0.6, 0.8, 0.6));
             player.addVelocity(0, -0.01, 0);
+        }
+
+        // 2. Fada no ar (Queda lenta/Voo leve)
+        if ("fairy".equals(currentRace) && !player.isOnGround() && !player.isSubmergedInWater()) {
+            if (player.getVelocity().y < 0 && !player.isSneaking()) {
+                player.setVelocity(player.getVelocity().multiply(1.0, 0.6, 1.0));
+            }
         }
     }
 }
