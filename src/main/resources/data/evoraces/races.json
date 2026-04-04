@@ -1,107 +1,9 @@
 {
   "races": [
     {
-      "id": "human",
-      "name": "Humano",
-      "description": "Raça versátil e adaptável, sem especializações mas também sem fraquezas pronunciadas.",
-      "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 75,
-        "resistance": 75
-      },
-      "abilities": ["basic_attack"],
-      "weaknesses": [],
-      "evolution_paths": ["warrior", "mage", "explorer"]
-    },
-    {
-      "id": "elf",
-      "name": "Elfo",
-      "description": "Raça ágil e inteligente, com afinidade natural com a magia e a natureza.",
-      "attributes": {
-        "vitality": 80,
-        "strength": 60,
-        "agility": 110,
-        "intellect": 110,
-        "resistance": 70
-      },
-      "abilities": ["dash", "nature_regen"],
-      "weaknesses": ["low_defense"],
-      "evolution_paths": ["high_elf", "forest_guardian", "arcane_mage"]
-    },
-    {
       "id": "dwarf",
       "name": "Anão",
-      "description": "Raça resistente e forte, excelente em combate corpo a corpo e mineração.",
-      "attributes": {
-        "vitality": 120,
-        "strength": 110,
-        "agility": 70,
-        "intellect": 80,
-        "resistance": 100
-      },
-      "abilities": ["stone_skin", "mining_expertise"],
-      "weaknesses": ["slow_movement"],
-      "evolution_paths": ["mountain_king", "blacksmith", "runesmith"]
-    },
-    {
-      "id": "undead",
-      "name": "Morto-vivo",
-      "description": "Alma humana corrompida por antigas maldições, caminha entre os vivos com afinidade natural por criaturas hostis e resistência sobrenatural.",
-      "attributes": {
-        "vitality": 100,
-        "strength": 100,
-        "agility": 100,
-        "intellect": 50,
-        "resistance": 120
-      }
-    },
-    {
-      "id": "fairy",
-      "name": "Fada",
-      "description": "Pequena criatura mágica com asas translúcidas. Possui grande domínio sobre poções e cura, mas é extremamente frágil fisicamente.",
-      "attributes": {
-        "vitality": 50,
-        "strength": 40,
-        "agility": 140,
-        "intellect": 130,
-        "resistance": 40
-      },
-      "abilities": ["levitation", "nature_blessing", "pixie_dust"],
-      "weaknesses": ["iron_allergy", "low_health"],
-      "evolution_paths": ["pixie", "nature_spirit", "titania_guard"]
-    },
-    {
-      "id": "gnome",
-      "name": "Gnome",
-      "description": "Pequena criatura mágica com asas translúcidas. Possui grande domínio sobre poções e cura, mas é extremamente frágil fisicamente.",
-      "attributes": {
-        "vitality": 50,
-        "strength": 40,
-        "agility": 140,
-        "intellect": 130,
-        "resistance": 40
-      },
-      "abilities": [
-        "levitation",
-        "nature_blessing",
-        "pixie_dust"
-      ],
-      "weaknesses": [
-        "iron_allergy",
-        "low_health"
-      ],
-      "evolution_paths": [
-        "pixie",
-        "nature_spirit",
-        "titania_guard"
-      ]
-    },
-    {
-      "id": "default",
-      "name": "default",
-      "description": "raça pré escolha",
+      "description": "Povo robusto e honrado, nascido das montanhas.",
       "attributes": {
         "vitality": 100,
         "strength": 100,
@@ -109,9 +11,129 @@
         "intellect": 100,
         "resistance": 100
       },
-      "abilities": ["x"],
-      "weaknesses": ["x"],
-      "evolution_paths": ["x"]
+      "abilities": [],
+      "weaknesses": [],
+      "evolution_paths": []
+    },
+    {
+      "id": "elf",
+      "name": "Elfo",
+      "description": "Seres ágeis de sentidos aguçados, ligados à magia primitiva da natureza",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": [],
+      "weaknesses": [],
+      "evolution_paths": []
+    },
+    {
+      "id": "fairy",
+      "name": "Fada",
+      "description": "Criaturas pequenas e aladas, dominam ilusões e encantamentos, mas são frágeis como pétalas.",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": [],
+      "weaknesses": [],
+      "evolution_paths": []
+    },
+    {
+      "id": "feline",
+      "name": "Felino",
+      "description": "Nômades curiosos que movem-se em silêncio como sombras com reflexos fulminantes",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": [],
+      "weaknesses": [],
+      "evolution_paths": []
+    },
+    {
+      "id": "gnome",
+      "name": "Gnomo",
+      "description": "Pequenos inventores e ilusionistas, adoram pregar peças mágicas.",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": [],
+      "weaknesses": [],
+      "evolution_paths": []
+    },
+    {
+      "id": "human",
+      "name": "Humano",
+      "description": "Raça ambiciosa e adaptável, de curta vida mas imenso potencial.",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": [],
+      "weaknesses": [],
+      "evolution_paths": []
+    },
+    {
+      "id": "tiefling",
+      "name": "Tiefling",
+      "description": "Ser de linhagem infernal, com resistência a fogo e afinidade com magias sombrias.",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": [],
+      "weaknesses": [],
+      "evolution_paths": []
+    },
+    {
+      "id": "orc",
+      "name": "Orc",
+      "description": "Raça bruta e poderosa, especialista em combate corpo a corpo e resistência física.",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": [],
+      "weaknesses": [],
+      "evolution_paths": []
+    },
+    {
+      "id": "default",
+      "name": "Default",
+      "description": "Raça padrão, sem modificadores.",
+      "attributes": {
+        "vitality": 100,
+        "strength": 100,
+        "agility": 100,
+        "intellect": 100,
+        "resistance": 100
+      },
+      "abilities": [],
+      "weaknesses": [],
+      "evolution_paths": []
     }
   ]
 }
